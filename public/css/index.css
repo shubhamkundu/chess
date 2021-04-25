@@ -1,0 +1,80 @@
+body {
+    margin: 0;
+}
+
+.cell {
+    width: 75px;
+    height: 75px;
+    border: 1px solid black;
+    float: left;
+}
+
+.cell.clearBoth {
+    clear: both;
+}
+
+.cell.notTopMost {
+    border-top: none;
+}
+
+.cell.notLeftMost {
+    border-left: none;
+}
+
+.cell.black {
+    background: black;
+}
+
+.cell.white {
+    background: white;
+}
+
+.cell.hasToken {
+    cursor: pointer;
+}
+
+.possibleCell {
+    background: rgba(217, 255, 0, 0.5) !important;
+    cursor: pointer;
+}
+
+.possibleCell.enemy {
+    background: rgba(255, 0, 0, 0.5) !important;
+}
+
+.token {
+    position: absolute;
+    font-size: 50px;
+    border: 0px solid red;
+    cursor: pointer;
+}
+
+.token.white {
+    color: white;
+}
+
+.token.black {
+    color: black;
+}
+
+.token.selectedToken.white {
+    color: rgb(192, 192, 192);
+}
+
+.token.selectedToken.black {
+    color: rgb(80, 80, 80);
+}
+
+i.white {
+    text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+}
+
+i.black {
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+@media (max-width:600px) {
+}
+
+@media (min-width:601px) {
+}
