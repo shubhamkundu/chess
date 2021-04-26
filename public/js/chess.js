@@ -133,29 +133,34 @@ socket.on('connect', function () {
 });
 
 function drawChessBoard() {
+    let tbl = document.createElement('table');
+    tbl = jQuery(tbl);
     for (let i = 0; i < 8; i++) {
+        let tr = document.createElement('tr');
+        tr = jQuery(tr);
+        tr.attr('r', i + 1);
         for (let j = 0; j < 8; j++) {
-            let cell = document.createElement('div');
+            let cell = document.createElement('td');
             cell = jQuery(cell);
             cell.addClass('cell');
-            if (i !== 0) {
-                cell.addClass('notTopMost');
-            }
-            if (j !== 0) {
-                cell.addClass('notLeftMost');
-            }
+            // if (i !== 0) {
+            //     cell.addClass('notTopMost');
+            // }
+            // if (j !== 0) {
+            //     cell.addClass('notLeftMost');
+            // }
             if ((i + j) % 2 !== 0) {
                 cell.addClass('black');
             } else {
                 cell.addClass('white');
             }
-            if (i !== 0 && j === 0) {
-                cell.addClass('clearBoth');
-            }
+            // if (i !== 0 && j === 0) {
+            //     cell.addClass('clearBoth');
+            // }
             cell.attr('id', 'cell-' + (i + 1) + '-' + (j + 1));
             cell.attr('r', i + 1);
             cell.attr('c', j + 1);
-            jQuery('.main').append(cell);
+            // jQuery('.main').append(cell);
             cell.click(function (event) {
                 const cell1 = jQuery('#' + event.target.id);
                 const r = Number(cell1.attr('r'));
@@ -188,8 +193,11 @@ function drawChessBoard() {
                     }
                 }
             });
+            tr.append(cell);
         }
+        tbl.append(tr);
     }
+    jQuery('.main').append(tbl);
 }
 
 function drawToken(r, c, tokenType, team) {
