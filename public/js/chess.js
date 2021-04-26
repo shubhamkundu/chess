@@ -143,24 +143,14 @@ function drawChessBoard() {
             let cell = document.createElement('td');
             cell = jQuery(cell);
             cell.addClass('cell');
-            // if (i !== 0) {
-            //     cell.addClass('notTopMost');
-            // }
-            // if (j !== 0) {
-            //     cell.addClass('notLeftMost');
-            // }
             if ((i + j) % 2 !== 0) {
                 cell.addClass('black');
             } else {
                 cell.addClass('white');
             }
-            // if (i !== 0 && j === 0) {
-            //     cell.addClass('clearBoth');
-            // }
             cell.attr('id', 'cell-' + (i + 1) + '-' + (j + 1));
             cell.attr('r', i + 1);
             cell.attr('c', j + 1);
-            // jQuery('.main').append(cell);
             cell.click(function (event) {
                 const cell1 = jQuery('#' + event.target.id);
                 const r = Number(cell1.attr('r'));
@@ -213,8 +203,8 @@ function drawToken(r, c, tokenType, team) {
     token.attr('team', team);
     token.html('<i class="fas fa-chess-' + tokenType + ' ' + team + '"></i>');
     token.attr('id', 'token-' + tokenType + '-' + r + '-' + c);
-    positionToken(token, r, c);
     jQuery('.main').append(token);
+    positionToken(token, r, c);
     token.click(function () {
         token = jQuery('#' + 'token-' + tokenType + '-' + r + '-' + c);
         if (!token.hasClass('selectedToken')) {
@@ -254,21 +244,23 @@ function positionToken(token, r, c) {
     cell.attr('tokenId', token.attr('id'));
     token.attr('r', r);
     token.attr('c', c);
-    let tknWidth;
+    const tokenFontSize = parseInt(token.css('font-size'));
+    let tknWidthFactor;
     if (tokenType === 'king') {
-        tknWidth = 43.75;
+        tknWidthFactor = 0.875;
     } else if (tokenType === 'queen') {
-        tknWidth = 50;
+        tknWidthFactor = 1;
     } else if (tokenType === 'bishop') {
-        tknWidth = 31.25;
+        tknWidthFactor = 0.625;
     } else if (tokenType === 'knight') {
-        tknWidth = 37.5;
+        tknWidthFactor = 0.75;
     } else if (tokenType === 'rook') {
-        tknWidth = 37.5;
+        tknWidthFactor = 0.75;
     } else if (tokenType === 'pawn') {
-        tknWidth = 31.25;
+        tknWidthFactor = 0.625;
     }
-    const tknHeight = 50;
+    const tknWidth = tknWidthFactor * tokenFontSize;
+    const tknHeight = tokenFontSize;
     token.css('left', (cell[0].offsetLeft + (cell[0].clientWidth - tknWidth) / 2) + 'px');
     token.css('top', (cell[0].offsetTop + (cell[0].clientHeight - tknHeight) / 2) + 'px');
 }

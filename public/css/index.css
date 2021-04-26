@@ -66,6 +66,19 @@ table {
 }
 
 @media (max-width:600px) {
+    .cell {
+        width: 30px;
+        height: 30px;
+        border: 1px solid black;
+        float: left;
+    }
+
+    .token {
+        position: absolute;
+        font-size: 20px;
+        border: 0px solid red;
+        cursor: pointer;
+    }
 }
 
 @media (min-width:601px) {
