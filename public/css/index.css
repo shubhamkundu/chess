@@ -26,6 +26,10 @@ body {
     cursor: pointer;
 }
 
+.lastMoveCell {
+    background: rgba(0, 0, 255, 0.5);
+}
+
 .possibleCell.enemy {
     background: rgba(255, 0, 0, 0.5) !important;
 }

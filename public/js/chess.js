@@ -113,6 +113,7 @@ function drawChessBoard() {
 }
 
 function onClickCell(data) {
+    cell.removeClass('lastMoveCell');
     const cell = jQuery(data.cellSelector);
     const r = Number(cell.attr('r'));
     const c = Number(cell.attr('c'));
@@ -167,6 +168,7 @@ function drawToken(r, c, tokenType, team) {
 }
 
 function onClickToken(data) {
+    cell.removeClass('lastMoveCell');
     const token = jQuery(data.tokenSelector);
     const team = token.attr('team');
     const otherTeam = team === 'white' ? 'black' : 'white';
@@ -225,7 +227,9 @@ function positionToken(token, r, c) {
     token.animate({
         left: (cell[0].offsetLeft + (cell[0].clientWidth - tknWidth) / 2) + 'px',
         top: (cell[0].offsetTop + (cell[0].clientHeight - tknHeight) / 2) + 'px'
-    })
+    });
+
+    cell.addClass('lastMoveCell');
 
     emit('setActiveTeam', { activeTeam: activeTeam === 'white' ? 'black' : 'white' });
 }
