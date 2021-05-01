@@ -113,7 +113,7 @@ function drawChessBoard() {
 }
 
 function onClickCell(data) {
-    cell.removeClass('lastMoveCell');
+    jQuery('.lastMoveCell').removeClass('lastMoveCell');
     const cell = jQuery(data.cellSelector);
     const r = Number(cell.attr('r'));
     const c = Number(cell.attr('c'));
