@@ -1,5 +1,7 @@
 var socket = io();
-var currentTeam = 'white';
+var activeTeam, thisTeam;
+
+prepareBoard();
 
 socket.on('connect', function () {
     console.log('User connected to client');
@@ -14,6 +16,21 @@ socket.on('connect', function () {
         alert(e.message);
     });
 
+    socket.on('clickCell', function (data) {
+        onClickCell(data);
+    });
+    socket.on('clickToken', function (data) {
+        onClickToken(data);
+    });
+    socket.on('setActiveTeam', function (data) {
+        setActiveTeam(data);
+    });
+    socket.on('setThisTeam', function (data) {
+        setThisTeam(data);
+    });
+});
+
+function prepareBoard() {
     drawChessBoard();
 
     drawToken(8, 1, 'rook', 'white');
@@ -52,85 +69,16 @@ socket.on('connect', function () {
     drawToken(2, 7, 'pawn', 'black');
     drawToken(2, 8, 'pawn', 'black');
 
-    jQuery('#message-form').on('submit', function (ev) {
-        ev.preventDefault();
+    setActiveTeam({ activeTeam: 'white' });
+}
 
-        messageTextbox = jQuery('[name=message]');
+function setThisTeam(data) {
+    thisTeam = data.thisTeam;
+}
 
-        socket.emit('sendMessage', {
-            from: params.name,
-            text: messageTextbox.val()
-        }, function () {
-            messageTextbox.val('');
-        },
-            // function (e) {
-            //     alert(e.message);
-            // }
-        );
-    });
-
-    jQuery('#send-location').on('click', function () {
-        var sendLocationButton = jQuery('#send-location');
-        sendLocationButton.text('Sending location...');
-        sendLocationButton.attr('disabled', 'disabled');
-
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser');
-            sendLocationButton.text('Send location');
-            sendLocationButton.removeAttr('disabled');
-        } else {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                socket.emit('sendLocation', {
-                    from: params.name,
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
-                }, function () {
-                    sendLocationButton.text('Send location');
-                    sendLocationButton.removeAttr('disabled');
-                },
-                    // function (e) {
-                    //     alert(e.message);
-                    // }
-                );
-            });
-        }
-    });
-
-    socket.on('receiveMessage', function (data) {
-        // var html = Mustache.render(jQuery('#message-template' + '-' + data.type).html(), {
-        //     from: data.from,
-        //     text: data.text,
-        //     createdOn: moment(data.createdOn).format('h:mm a')
-        // });
-
-        // jQuery('#messages').append(html);
-        // forceScrollToBottom();
-    });
-
-    socket.on('receiveLocation', function (data) {
-        var html = Mustache.render(jQuery('#location-template' + '-' + data.type).html(), {
-            from: data.from,
-            url: data.url,
-            createdOn: moment(data.createdOn).format('h:mm a')
-        });
-
-        jQuery('#messages').append(html);
-        forceScrollToBottom();
-    });
-
-    socket.on('updateUsers', function (users) {
-        console.log(users);
-        // var html = Mustache.render(jQuery('#users-template').html(), {
-        //     users
-        // });
-
-        // jQuery('#users').html(html);
-    });
-
-    jQuery('.menu-icon').on('click', function () {
-        jQuery('.chat__sidebar').toggle();
-    });
-});
+function setActiveTeam(data) {
+    activeTeam = data.activeTeam;
+}
 
 function drawChessBoard() {
     let tbl = document.createElement('table');
@@ -152,35 +100,9 @@ function drawChessBoard() {
             cell.attr('r', i + 1);
             cell.attr('c', j + 1);
             cell.click(function (event) {
-                const cell1 = jQuery('#' + event.target.id);
-                const r = Number(cell1.attr('r'));
-                const c = Number(cell1.attr('c'));
-                const token = jQuery('.token[r="' + r + '"][c="' + c + '"]');
-                if (cell1.hasClass('possibleCell')) {
-                    const selectedToken = jQuery('.selectedToken');
-                    if (selectedToken.length) {
-                        if (cell1.hasClass('enemy')) {
-                            const team = token.attr('team');
-                            const otherTeam = team === 'white' ? 'black' : 'white';
-                            if (token.attr('tokenType') === 'king') {
-                                alert(otherTeam + ' won');
-                                window.location.reload();
-                            }
-                            token.remove();
-                        }
-                        deselectToken(selectedToken);
-                        positionToken(selectedToken, r, c);
-                        currentTeam = currentTeam === 'white' ? 'black' : 'white';
-                    }
-                } else if (token.length) {
-                    if (token.attr('team') === currentTeam) {
-                        if (!token.hasClass('selectedToken')) {
-                            selectToken(token);
-                            showPossibleCells(token);
-                        } else {
-                            deselectToken(token);
-                        }
-                    }
+                if (thisTeam === activeTeam) {
+                    const cellSelector = '#' + event.target.id;
+                    emit('clickCell', { cellSelector, activeTeam });
                 }
             });
             tr.append(cell);
@@ -190,8 +112,39 @@ function drawChessBoard() {
     jQuery('.main').append(tbl);
 }
 
+function onClickCell(data) {
+    const cell = jQuery(data.cellSelector);
+    const r = Number(cell.attr('r'));
+    const c = Number(cell.attr('c'));
+    const tokenSelector = '.token[r="' + r + '"][c="' + c + '"]';
+    const token = jQuery(tokenSelector);
+    if (cell.hasClass('possibleCell')) {
+        const selectedToken = jQuery('.selectedToken');
+        if (selectedToken.length) {
+            if (cell.hasClass('enemy')) {
+                const team = token.attr('team');
+                const otherTeam = team === 'white' ? 'black' : 'white';
+                if (token.attr('tokenType') === 'king') {
+                    alert(otherTeam + ' won');
+                    window.location.reload();
+                }
+                token.remove();
+            }
+            deselectToken(selectedToken);
+            positionToken(selectedToken, r, c);
+        }
+    } else if (token.length) {
+        if (token.attr('team') === activeTeam) {
+            if (!token.hasClass('selectedToken')) {
+                selectToken({ tokenSelector });
+            } else {
+                deselectToken(token);
+            }
+        }
+    }
+}
+
 function drawToken(r, c, tokenType, team) {
-    const otherTeam = team === 'white' ? 'black' : 'white';
     let token = document.createElement('div');
     token = jQuery(token);
     token.addClass('token');
@@ -206,35 +159,42 @@ function drawToken(r, c, tokenType, team) {
     jQuery('.main').append(token);
     positionToken(token, r, c);
     token.click(function () {
-        token = jQuery('#' + 'token-' + tokenType + '-' + r + '-' + c);
-        if (!token.hasClass('selectedToken')) {
-            const r = token.attr('r');
-            const c = token.attr('c');
-            const otherTeamSelectedToken = jQuery('.selectedToken.' + otherTeam);
-            const thisCell = jQuery('#cell-' + r + '-' + c);
-            if (thisCell.hasClass('enemy')) {
-                const team = token.attr('team');
-                const otherTeam = team === 'white' ? 'black' : 'white';
-                if (token.attr('tokenType') === 'king') {
-                    alert(otherTeam + ' won');
-                    window.location.reload();
-                }
-                token.remove();
-                deselectToken(otherTeamSelectedToken);
-                positionToken(otherTeamSelectedToken, r, c);
-                currentTeam = currentTeam === 'white' ? 'black' : 'white';
-            } else {
-                if (token.attr('team') === currentTeam) {
-                    selectToken(token);
-                    showPossibleCells(token);
-                }
-            }
-        } else {
-            if (token.attr('team') === currentTeam) {
-                deselectToken(token);
-            }
+        if (thisTeam === activeTeam) {
+            const tokenSelector = '#' + 'token-' + tokenType + '-' + r + '-' + c;
+            emit('clickToken', { tokenSelector, activeTeam });
         }
     });
+}
+
+function onClickToken(data) {
+    const token = jQuery(data.tokenSelector);
+    const team = token.attr('team');
+    const otherTeam = team === 'white' ? 'black' : 'white';
+    if (!token.hasClass('selectedToken')) { // on click non-selected token
+        const r = token.attr('r');
+        const c = token.attr('c');
+        const otherTeamSelectedToken = jQuery('.selectedToken.' + otherTeam);
+        const thisCell = jQuery('#cell-' + r + '-' + c);
+        if (thisCell.hasClass('enemy')) { // on click enemy token to remove
+            const team = token.attr('team');
+            const otherTeam = team === 'white' ? 'black' : 'white';
+            if (token.attr('tokenType') === 'king') {
+                alert(otherTeam + ' won');
+                window.location.reload();
+            }
+            token.remove();
+            deselectToken(otherTeamSelectedToken);
+            positionToken(otherTeamSelectedToken, r, c);
+        } else { // on click non-selected token to select
+            if (token.attr('team') === activeTeam) {
+                selectToken({ tokenSelector: data.tokenSelector });
+            }
+        }
+    } else { // on click selected token
+        if (token.attr('team') === activeTeam) {
+            deselectToken(token);
+        }
+    }
 }
 
 function positionToken(token, r, c) {
@@ -261,15 +221,26 @@ function positionToken(token, r, c) {
     }
     const tknWidth = tknWidthFactor * tokenFontSize;
     const tknHeight = tokenFontSize;
-    token.css('left', (cell[0].offsetLeft + (cell[0].clientWidth - tknWidth) / 2) + 'px');
-    token.css('top', (cell[0].offsetTop + (cell[0].clientHeight - tknHeight) / 2) + 'px');
+
+    token.animate({
+        left: (cell[0].offsetLeft + (cell[0].clientWidth - tknWidth) / 2) + 'px',
+        top: (cell[0].offsetTop + (cell[0].clientHeight - tknHeight) / 2) + 'px'
+    })
+
+    emit('setActiveTeam', { activeTeam: activeTeam === 'white' ? 'black' : 'white' });
 }
 
-function selectToken(token) {
+function emit(eventName, data) {
+    socket.emit(eventName + 'S', data);
+}
+
+function selectToken(data) {
+    const token = jQuery(data.tokenSelector);
     jQuery('.selectedToken').removeClass('selectedToken');
     token.addClass('selectedToken');
     jQuery('.possibleCell').removeClass('possibleCell');
     jQuery('.enemy').removeClass('enemy');
+    showPossibleCells(token);
 }
 
 function deselectToken(token) {
