@@ -180,7 +180,7 @@ function onClickToken(data) {
             const otherTeam = team === 'white' ? 'black' : 'white';
             if (token.attr('tokenType') === 'king') {
                 alert(otherTeam + ' won');
-                window.location.reload();
+                window.location.href = window.location.origin;
             }
             token.remove();
             deselectToken(otherTeamSelectedToken);
