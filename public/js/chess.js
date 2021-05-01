@@ -132,7 +132,7 @@ function onClickCell(data) {
                 token.remove();
             }
             deselectToken(selectedToken);
-            positionToken(selectedToken, r, c);
+            positionToken(selectedToken, r, c, 'clickCell');
         }
     } else if (token.length) {
         if (token.attr('team') === activeTeam) {
@@ -158,7 +158,7 @@ function drawToken(r, c, tokenType, team) {
     token.html('<i class="fas fa-chess-' + tokenType + ' ' + team + '"></i>');
     token.attr('id', 'token-' + tokenType + '-' + r + '-' + c);
     jQuery('.main').append(token);
-    positionToken(token, r, c);
+    positionToken(token, r, c, 'drawToken');
     token.click(function () {
         if (thisTeam === activeTeam) {
             const tokenSelector = '#' + 'token-' + tokenType + '-' + r + '-' + c;
@@ -186,7 +186,7 @@ function onClickToken(data) {
             }
             token.remove();
             deselectToken(otherTeamSelectedToken);
-            positionToken(otherTeamSelectedToken, r, c);
+            positionToken(otherTeamSelectedToken, r, c, 'clickToken');
         } else { // on click non-selected token to select
             if (token.attr('team') === activeTeam) {
                 selectToken({ tokenSelector: data.tokenSelector });
@@ -199,7 +199,7 @@ function onClickToken(data) {
     }
 }
 
-function positionToken(token, r, c) {
+function positionToken(token, r, c, actionType) {
     const tokenType = token.attr('tokenType');
     const cell = jQuery('#cell-' + r + '-' + c);
     cell.addClass('hasToken');
@@ -229,7 +229,9 @@ function positionToken(token, r, c) {
         top: (cell[0].offsetTop + (cell[0].clientHeight - tknHeight) / 2) + 'px'
     });
 
-    cell.addClass('lastMoveCell');
+    if (actionType !== 'drawToken') {
+        cell.addClass('lastMoveCell');
+    }
 
     emit('setActiveTeam', { activeTeam: activeTeam === 'white' ? 'black' : 'white' });
 }
