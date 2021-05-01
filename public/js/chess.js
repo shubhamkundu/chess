@@ -168,7 +168,7 @@ function drawToken(r, c, tokenType, team) {
 }
 
 function onClickToken(data) {
-    cell.removeClass('lastMoveCell');
+    jQuery('.lastMoveCell').removeClass('lastMoveCell');
     const token = jQuery(data.tokenSelector);
     const team = token.attr('team');
     const otherTeam = team === 'white' ? 'black' : 'white';
