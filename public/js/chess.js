@@ -9,8 +9,7 @@ socket.on('connect', function () {
 
     socket.emit('join', {
         name: params.name,
-        room: params.room,
-        purpose: 'chat'
+        room: params.room
     }, function (e) {
         window.location.href = '/';
         alert(e.message);
